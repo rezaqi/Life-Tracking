@@ -56,71 +56,74 @@ class _LifeCalendarPageState extends State<LifeCalendarPage> {
         centerTitle: true,
         backgroundColor: Colors.white,
       ),
-      body: Column(
-        children: [
-          CategoryProgressBar(
-            progress: 0.3,
-            category: "healthy",
-            color: Colors.blue,
-          ),
-          CategoryProgressBar(
-            progress: 0.7,
-            category: "Travel",
-            color: Colors.red,
-          ),
-          CategoryProgressBar(
-            progress: 0.4,
-            category: "work",
-            color: Colors.green,
-          ),
-          CategoryProgressBar(
-            progress: 0.5,
-            category: "children",
-            color: Colors.pink,
-          ),
-          // Dropdown لاختيار وضع العرض
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "View: ",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                DropdownButton<String>(
-                  value: viewMode,
-                  items: viewOptions
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      viewMode = val!;
-                    });
-                  },
-                ),
-              ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: [
+            CategoryProgressBar(
+              progress: 0.3,
+              category: "healthy",
+              color: Colors.blue,
             ),
-          ),
-          Expanded(
-            child: BlocBuilder<LifeBloc, LifeState>(
-              builder: (context, state) {
-                if (state.isLoading)
-                  return const Center(child: CircularProgressIndicator());
-
-                final today = DateTime.now();
-
-                if (viewMode == 'Weekly') {
-                  return _buildWeeklyCalendar(state, today);
-                } else if (viewMode == 'Monthly') {
-                  return _buildMonthlyCalendar(state, w, today);
-                } else {
-                  return _buildYearlyCalendar(state, today);
-                }
-              },
+            CategoryProgressBar(
+              progress: 0.7,
+              category: "Travel",
+              color: Colors.red,
             ),
-          ),
-        ],
+            CategoryProgressBar(
+              progress: 0.4,
+              category: "work",
+              color: Colors.green,
+            ),
+            CategoryProgressBar(
+              progress: 0.5,
+              category: "children",
+              color: Colors.pink,
+            ),
+            // Dropdown لاختيار وضع العرض
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "View: ",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  DropdownButton<String>(
+                    value: viewMode,
+                    items: viewOptions
+                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        viewMode = val!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: BlocBuilder<LifeBloc, LifeState>(
+                builder: (context, state) {
+                  if (state.isLoading)
+                    return const Center(child: CircularProgressIndicator());
+
+                  final today = DateTime.now();
+
+                  if (viewMode == 'Weekly') {
+                    return _buildWeeklyCalendar(state, today);
+                  } else if (viewMode == 'Monthly') {
+                    return _buildMonthlyCalendar(state, w, today);
+                  } else {
+                    return _buildYearlyCalendar(state, today);
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -237,7 +240,7 @@ class _LifeCalendarPageState extends State<LifeCalendarPage> {
     }
 
     return SingleChildScrollView(
-      child: Table(defaultColumnWidth: FixedColumnWidth(w / 7), children: rows),
+      child: Table(defaultColumnWidth: FixedColumnWidth(w / 8), children: rows),
     );
   }
 

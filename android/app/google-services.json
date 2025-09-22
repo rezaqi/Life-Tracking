@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1082789317708",
+    "project_id": "mementoapp-a5c3f",
+    "storage_bucket": "mementoapp-a5c3f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1082789317708:android:6421dab8983394cf9578e9",
+        "android_client_info": {
+          "package_name": "com.example.life_tracking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-jAKSR9tqwX1Cq9qX8-FU2NhxvWow5BM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

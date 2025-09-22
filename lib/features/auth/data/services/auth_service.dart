@@ -1,53 +1,93 @@
 // features/auth/data/services/auth_service.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:life_tracking/features/auth/data/models/user.dart';
 
 class AuthService {
-  UserModel? _user;
-  final List<UserModel> _users = []; // 👈 عشان نعمل حسابات جديدة ونخزنها مؤقت
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// تسجيل الدخول
   Future<UserModel?> login(String email, String password) async {
-    await Future.delayed(const Duration(seconds: 1));
     try {
-      final user = _users.firstWhere(
-        (u) => u.email == email && u.pass == password,
+      final credential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      _user = user;
-      return _user;
-    } catch (e) {
-      return null; // فشل تسجيل الدخول
+      final user = credential.user;
+      if (user != null) {
+        return UserModel(
+          id: user.uid,
+          email: user.email ?? '',
+          name: user.displayName ?? '',
+          pass: '', // مش هتخزن الباسورد
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      print("Login error: ${e.message}");
     }
+    return null;
   }
 
   /// تسجيل الخروج
   Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _user = null;
+    await _auth.signOut();
   }
 
   /// إنشاء حساب جديد
   Future<UserModel?> signUp(
     String email,
     String password,
-    String username,
-  ) async {
-    await Future.delayed(const Duration(seconds: 1));
-    // تأكد إن الايميل مش مستخدم قبل كده
-    final exists = _users.any((u) => u.email == email);
-    if (exists) return null;
+    String username, {
+    int? age, // Optional: add age when signing up
+  }) async {
+    try {
+      // Create user with Firebase Authentication
+      final credential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    final newUser = UserModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      email: email,
-      name: username,
-      pass: password,
-    );
+      // Update display name in Firebase Auth
+      await credential.user?.updateDisplayName(username);
 
-    _users.add(newUser);
-    _user = newUser;
-    return _user;
+      final user = credential.user;
+      if (user != null) {
+        final newUser = UserModel(
+          id: user.uid,
+          email: user.email ?? '',
+          name: username,
+          pass: '', // Don't store password locally
+        );
+
+        // ✅ Save user data to Firestore
+        await _firestore.collection("users").doc(user.uid).set({
+          "id": user.uid,
+          "email": user.email,
+          "name": username,
+          "age": age, // Can be null if not provided
+          "createdAt": FieldValue.serverTimestamp(),
+        });
+
+        return newUser;
+      }
+    } on FirebaseAuthException catch (e) {
+      print("Signup error: ${e.message}");
+    }
+    return null;
   }
 
   /// المستخدم الحالي
-  UserModel? get currentUser => _user;
+  UserModel? get currentUser {
+    final user = _auth.currentUser;
+    if (user != null) {
+      return UserModel(
+        id: user.uid,
+        email: user.email ?? '',
+        name: user.displayName ?? '',
+        pass: '',
+      );
+    }
+    return null;
+  }
 }

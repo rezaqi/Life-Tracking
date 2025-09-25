@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:life_tracking/check_root.dart';
 import 'package:life_tracking/core/class/routs_name.dart';
 import 'package:life_tracking/features/auth/presentation/pages/login_page.dart';
 import 'package:life_tracking/features/auth/presentation/pages/signup_page.dart';
+import 'package:life_tracking/features/dashboard/dashboard.dart';
+import 'package:life_tracking/features/dashboard/presentation/life_prograss.dart';
 import 'package:life_tracking/features/life_celendar/presentation/pages/life_calendar_page.dart';
+import 'package:life_tracking/features/moments/presentation/page/follow_events.dart';
+import 'package:life_tracking/features/onboarding/presentation/page/intro_screen.dart';
+import 'package:life_tracking/features/onboarding/presentation/page/user_input_screen.dart';
+import 'package:life_tracking/features/tabs/presentaion/page/tabs.dart';
 
 Map<String, Widget Function(BuildContext)> routs = {
-  '/': (_) => const LoginPage(),
-  '/signup': (_) => SignUpPage(),
+  '/': (_) => RootScreen(),
+  AppRouts.introScreen: (_) => IntroScreen(),
+  AppRouts.userInputScreen: (_) => UserInputScreen(),
+  AppRouts.dashboardScreen: (_) => ClientInfoPage(),
+  AppRouts.tabsScreen: (_) => TabsScreen(),
+
+  AppRouts.lifeProgressPage: (_) => LifeProgressPage(),
+  AppRouts.login: (_) => const LoginPage(),
+  AppRouts.signup: (_) => SignUpPage(),
   AppRouts.lifeCalendarPage: (_) => const LifeCalendarPage(),
-  // "/": (_) => CategoryProgressBar(
-  //   progress: 10,
-  //   color: Colors.blue,
-  //   category: "category",
-  // ),
+
+  AppRouts.followEvents: (_) => const FollowEvents(),
 };

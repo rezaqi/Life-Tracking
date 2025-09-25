@@ -1,5 +1,8 @@
 // features/life_calendar/presentation/bloc/life_event.dart
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 import '../../data/models/milestone_model.dart';
 
@@ -52,3 +55,45 @@ class ToggleViewEvent extends LifeEvent {
 
 /// Enum: Defines the view type for Life Calendar
 enum ViewType { weeks, months, years }
+
+class UploadImageToCloudinaryEvent extends LifeEvent {
+  List<File> file;
+  UploadImageToCloudinaryEvent({required this.file});
+}
+
+class OnAddImages extends LifeEvent {
+  final List<File> images;
+  OnAddImages(this.images);
+}
+
+class OnChangeMood extends LifeEvent {
+  final String? mood;
+  OnChangeMood(this.mood);
+}
+
+class OnChangeTitle extends LifeEvent {
+  final String title;
+  OnChangeTitle(this.title);
+}
+
+class OnChangeDescription extends LifeEvent {
+  final String description;
+  OnChangeDescription(this.description);
+}
+
+class OnRemoveImage extends LifeEvent {
+  final File image;
+  OnRemoveImage(this.image);
+}
+
+class OnSaveDay extends LifeEvent {
+  final BuildContext context;
+  OnSaveDay(this.context);
+}
+
+class LoadDayMemory extends LifeEvent {
+  final String userId;
+  final DateTime date;
+
+  LoadDayMemory(this.userId, this.date);
+}

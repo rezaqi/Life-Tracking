@@ -1,13 +1,23 @@
 // features/life_calendar/data/repositories/life_repository_impl.dart
+import 'dart:io';
+
+import 'package:dartz/dartz.dart';
+import 'package:flutter/src/widgets/framework.dart';
+import 'package:injectable/injectable.dart';
+import 'package:life_tracking/core/class/faiiur.dart';
+import 'package:life_tracking/features/life_celendar/data/datasources/dm.dart';
 import 'package:life_tracking/features/life_celendar/data/datasources/local_db.dart';
+import 'package:life_tracking/features/life_celendar/data/models/day_model.dart';
 import 'package:life_tracking/features/life_celendar/data/models/dot_model.dart';
 import 'package:life_tracking/features/life_celendar/data/models/milestone_model.dart';
 
 import '../../domain/repositories/life_repository.dart';
 
+@Injectable(as: LifeRepository)
 class LifeRepositoryImpl implements LifeRepository {
   final LocalDb _db;
-  LifeRepositoryImpl(this._db);
+  final DmLifeCalender dataSource;
+  LifeRepositoryImpl(this._db, this.dataSource);
 
   @override
   List<DotModel> generateDotsForYear(int year) {
@@ -56,4 +66,40 @@ class LifeRepositoryImpl implements LifeRepository {
   @override
   Future<void> addMilestone(DateTime week, MilestoneModel milestone) =>
       _db.addMilestone(week, milestone);
+
+  @override
+  Future<Either<Failure, List<String?>>> uploadImageToCloudinary(
+    List<File> imageFile,
+  ) async {
+    try {
+      var res = await dataSource.uploadImageToCloudinary(imageFile);
+      return Right(res);
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Future<void> saveDay(
+    BuildContext context,
+    List<File> imageFiles,
+    String docId,
+    String title,
+    String des,
+    String mood,
+    String date,
+  ) {
+    return dataSource.saveDay(
+      context,
+      imageFiles,
+      docId,
+      title,
+      des,
+      mood,
+      date,
+    );
+  }
+
+  Future<DayModel?> getDayMemory(String userId, String date) =>
+      dataSource.getDayMemory(userId, date);
 }

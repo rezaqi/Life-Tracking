@@ -1,4 +1,6 @@
 // features/auth/domain/auth_service.dart
+import 'package:injectable/injectable.dart';
+
 abstract class AuthService {
   Future<bool> login(String email, String password);
   Future<void> logout();
@@ -9,7 +11,7 @@ abstract class AuthService {
   ); // 👈 جديد
 }
 
-// features/auth/data/auth_repository.dart
+@Injectable(as: AuthService)
 class MockAuthRepository implements AuthService {
   final List<Map<String, String>> _users = [];
 

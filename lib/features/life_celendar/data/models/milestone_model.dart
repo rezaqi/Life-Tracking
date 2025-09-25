@@ -1,4 +1,3 @@
-// features/life_calendar/data/models/milestone_model.dart
 class MilestoneModel {
   final String title;
   final DateTime date;

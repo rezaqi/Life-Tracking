@@ -1,93 +1,83 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-// Widget مخصص لشريط التقدم للفئة
-class CategoryProgressBar extends StatelessWidget {
-  final String category;
-  final double progress;
-  final Color color;
-
-  const CategoryProgressBar({
-    Key? key,
-    required this.category,
-    required this.progress,
-    required this.color,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(category, style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 4),
-        LinearProgressIndicator(
-          value: progress,
-          color: color,
-          backgroundColor: color.withOpacity(0.2),
-          minHeight: 8,
-        ),
-        SizedBox(height: 12),
-      ],
-    );
-  }
-}
-
-// الصفحة الرئيسية للوحة تقدم الحياة
 class LifeProgressPage extends StatelessWidget {
   const LifeProgressPage({Key? key}) : super(key: key);
 
-  // بيانات وهمية للفئات
-  final List<Map<String, dynamic>> categories = const [
-    {'name': 'وظيفية', 'progress': 0.7, 'color': Colors.blue},
-    {'name': 'صحية', 'progress': 0.5, 'color': Colors.green},
-    {'name': 'أطفال', 'progress': 0.3, 'color': Colors.orange},
-    {'name': 'سفر', 'progress': 0.6, 'color': Colors.purple},
-    {'name': 'تحديث', 'progress': 0.8, 'color': Colors.red},
-  ];
+  Future<Map<String, dynamic>?> _getUserLifeData() async {
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+    final doc = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(uid) // حط الـ uid بتاع اليوزر الحالي
+        .get();
+
+    if (doc.exists) {
+      return doc.data();
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    // حساب التقدم الكلي (متوسط الفئات)
-    double totalProgress =
-        categories.fold<double>(
-          0,
-          (sum, cat) => sum + (cat['progress'] as double),
-        ) /
-        categories.length;
-
     return Scaffold(
-      appBar: AppBar(title: Text('لوحة تقدم الحياة'), centerTitle: true),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'التقدم الكلي',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      appBar: AppBar(title: const Text('شريط تقدم الحياة'), centerTitle: true),
+      body: FutureBuilder<Map<String, dynamic>?>(
+        future: _getUserLifeData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text("لا توجد بيانات"));
+          }
+
+          final userData = snapshot.data!;
+          final int age = userData["age"] ?? 0;
+          final int lifeExpectancy = userData["lifeExpectancy"] ?? 70;
+
+          double progress = 0;
+          if (lifeExpectancy > 0) {
+            progress = age / lifeExpectancy;
+            if (progress > 1) progress = 1; // علشان مايزودش عن 100%
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "عمرك: $age سنة",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  "متوسط العمر المتوقع: $lifeExpectancy سنة",
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                LinearProgressIndicator(
+                  value: progress,
+                  color: Colors.teal,
+                  backgroundColor: Colors.teal.withOpacity(0.2),
+                  minHeight: 14,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "لقد عشت ${(progress * 100).toStringAsFixed(1)}% من حياتك",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: totalProgress,
-              color: Colors.teal,
-              backgroundColor: Colors.teal.withOpacity(0.2),
-              minHeight: 12,
-            ),
-            SizedBox(height: 24),
-            Text(
-              'الفئات',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 12),
-            ...categories.map(
-              (cat) => CategoryProgressBar(
-                category: cat['name'],
-                progress: cat['progress'],
-                color: cat['color'],
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

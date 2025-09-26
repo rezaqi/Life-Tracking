@@ -1,9 +1,7 @@
 // features/auth/data/services/auth_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
-import 'package:life_tracking/core/class/routs_name.dart';
 import 'package:life_tracking/features/auth/data/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -74,18 +72,20 @@ class AuthService {
   }
 
   Future<UserModel?> signUp(
-    BuildContext context,
+    //  BuildContext context,
     String email,
     String password,
     String username,
     String birthday,
-    int age,
-    String gender,
-    String country,
     int lifeExpectancy,
     String relationship,
     List<String> goals,
-    String haveChildren, // جديد
+    String haveChildren,
+    String country,
+    List<Map<String, dynamic>> children,
+    String partnerName,
+    String partnerBirthday,
+    String anniversary,
   ) async {
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
@@ -97,49 +97,60 @@ class AuthService {
 
       final user = credential.user;
       if (user != null) {
+        DateTime? birthDate;
+        try {
+          birthDate = DateTime.parse(birthday);
+        } catch (_) {}
+        int age = 0;
+        if (birthDate != null) {
+          DateTime today = DateTime.now();
+          age = today.year - birthDate.year;
+          if (today.month < birthDate.month ||
+              (today.month == birthDate.month && today.day < birthDate.day)) {
+            age--;
+          }
+        }
+
         final newUser = UserModel(
-          lifeExpectancy: lifeExpectancy,
           id: user.uid,
-          email: user.email ?? '',
+          email: email,
           name: username,
           birthday: birthday,
-          pass: '',
           age: age,
-          gender: gender,
-          country: country,
+          lifeExpectancy: lifeExpectancy,
           relationship: relationship,
           goals: goals,
-          haveChildren: haveChildren, // جديد
+          country: country,
+          haveChildren: haveChildren,
+          gender: '',
+          pass: '',
         );
 
         await _firestore.collection("users").doc(user.uid).set({
           "id": user.uid,
-          "email": user.email,
+          "email": email,
           "name": username,
-          "age": age,
           "birthday": birthday,
-          "gender": gender,
-          "country": country,
+          "age": age,
           "lifeExpectancy": lifeExpectancy,
           "relationship": relationship,
           "goals": goals,
-          "haveChildren": haveChildren, // جديد
+          "haveChildren": haveChildren,
+          "country": country,
+          "children": children,
+          "partnerName": partnerName,
+          "partnerBirthday": partnerBirthday,
+          "anniversary": anniversary,
           "createdAt": FieldValue.serverTimestamp(),
         });
 
-        // حفظ البيانات في SharedPreferences
+        // حفظ محلي
         await _saveUserToPrefs(newUser);
-
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          AppRouts.tabsScreen,
-          (r) => false,
-          arguments: user,
-        );
 
         return newUser;
       }
     } on FirebaseAuthException catch (e) {
-      print("Signup error: ${e.message}");
+      throw Exception(e.message);
     }
     return null;
   }

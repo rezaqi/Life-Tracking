@@ -12,6 +12,7 @@ import 'package:life_tracking/features/life_celendar/presentation/bloc/life_bloc
 import 'package:life_tracking/features/life_celendar/presentation/bloc/life_event.dart';
 import 'package:life_tracking/features/life_celendar/presentation/bloc/life_state.dart';
 import 'package:life_tracking/features/life_celendar/presentation/pages/dayDetailsPage.dart';
+import 'package:life_tracking/features/life_celendar/presentation/widgets/lifeWeeksWidget.dart';
 import 'package:life_tracking/features/life_celendar/presentation/widgets/life_progress_page.dart';
 
 class LifeCalendarPage extends StatefulWidget {
@@ -152,9 +153,10 @@ class _LifeCalendarPageState extends State<LifeCalendarPage> {
                 ),
                 SizedBox(height: h * 0.02),
                 SizedBox(
-                  height: 200.h, // ممكن تغير على حسب اللي انت عايزه
-                  child: LifeProgressPage(),
+                  height: 120.h, // ممكن تغير على حسب اللي انت عايزه
+                  child: LifeProgressWidget(),
                 ),
+                LifeWeeksWidget(currentAge: 25, lifeExpectancy: 96),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(

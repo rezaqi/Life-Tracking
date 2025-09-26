@@ -62,72 +62,61 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     });
 
-    // 🔹 إنشاء حساب جديد
     on<SignUpRequested>((event, emit) async {
-      if (formKey.currentState!.validate()) {
-        emit(state.copyWith(requestStateSignUp: RequestState.loading));
+      print("jjjjjjjj");
+      emit(state.copyWith(requestStateSignUp: RequestState.loading));
+      try {
+        print("anana");
+        Map<String, dynamic> data = await LocalStorage.getUserData();
 
-        try {
-          Map<String, dynamic> data = await LocalStorage.getUserData();
+        final user = await _authService.signUp(
+          //   event.context,
+          event.email,
+          event.password,
+          data['name'],
+          data['birthday'],
+          data['lifeExpectancy'],
+          data['relationship'],
+          List<String>.from(data['goals'] ?? []),
+          data['haveChildren'] ?? '',
+          data['country'] ?? '',
+          data['children'] ?? [],
+          data['partnerName'] ?? '',
+          data['partnerBirthday'] ?? '',
+          data['anniversary'] ?? '',
+        );
 
-          String username = data['name'];
-          String birthday = data['birthday'];
-          int lifeExpectancy = data['lifeExpectancy'];
-          String relationship = data['relationship'] ?? "";
-          List<String> goals = List<String>.from(data['goals'] ?? []);
-          String haveChildren = data['haveChildren'] ?? ""; // جديد
-
-          DateTime? birthDate = safeParseBirthday(birthday);
-          if (birthDate == null) {
-            throw Exception("Invalid birthday format: $birthday");
-          }
-
-          DateTime today = DateTime.now();
-          int age = today.year - birthDate.year;
-          if (today.month < birthDate.month ||
-              (today.month == birthDate.month && today.day < birthDate.day)) {
-            age--;
-          }
-
-          final user = await _authService.signUp(
-            event.context,
-            event.email,
-            event.password,
-            username,
-            birthday,
-            age,
-            event.gender,
-            event.country,
-            lifeExpectancy,
-            relationship,
-            goals,
-            haveChildren, // تمرير القيمة الجديدة
+        if (user != null) {
+          emit(
+            state.copyWith(
+              requestStateSignUp: RequestState.success,
+              user: user,
+            ),
           );
 
-          if (user != null) {
-            emit(
-              state.copyWith(
-                requestStateSignUp: RequestState.success,
-                user: user,
-              ),
-            );
-          } else {
-            emit(
-              state.copyWith(
-                requestStateSignUp: RequestState.error,
-                failureSignUp: Failure("Signup failed"),
-              ),
-            );
-          }
-        } catch (e) {
+          // ✅ الانتقال مباشرةً لآخر صفحة
+          // Navigator.of(
+          //   event.context,
+          // ).pushReplacementNamed(AppRouts.tabsScreen);
+        } else {
           emit(
             state.copyWith(
               requestStateSignUp: RequestState.error,
-              failureSignUp: Failure(e.toString()),
+              failureSignUp: Failure("Signup failed"),
             ),
           );
         }
+      } catch (e) {
+        emit(
+          state.copyWith(
+            requestStateSignUp: RequestState.error,
+            failureSignUp: Failure(e.toString()),
+          ),
+        );
       }
+      // if (formKey.currentState != null && formKey.currentState!.validate()) {
+
+      // }
     });
   }
 

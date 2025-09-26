@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:life_tracking/features/life_celendar/presentation/pages/life_calendar_page.dart';
 import 'package:life_tracking/features/life_celendar/presentation/widgets/life_progress_page.dart';
+import 'package:life_tracking/features/life_tracker/presentation/page/life_tracker.dart';
 import 'package:life_tracking/features/moments/presentation/page/momrnts.dart';
 import 'package:life_tracking/features/tabs/presentaion/manager/state_tab.dart';
 import 'package:life_tracking/features/tabs/presentaion/manager/tab_event.dart';
@@ -23,7 +24,7 @@ class TabBloc extends Bloc<TabsEvent, TabsState> {
 
   void changeScreen(int val, BuildContext context) {
     if (val == 0) {
-      title = "Life Calender";
+      title = "Dashboard";
     } else if (val == 1) {
       title = "progress";
     } else if (val == 2) {
@@ -36,9 +37,9 @@ class TabBloc extends Bloc<TabsEvent, TabsState> {
   }
 
   List tabs = [
+    LifeTrackerHome(),
     LifeCalendarPage(),
-    LifeProgressPage(),
     MomentsPage(),
-    LifeProgressPage(),
+    LifeProgressWidget(),
   ];
 }

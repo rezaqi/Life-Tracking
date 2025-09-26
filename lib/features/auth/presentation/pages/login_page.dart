@@ -81,13 +81,13 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 12),
 
-                    // ✅ زر تسجيل حساب جديد
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, "/signup");
-                      },
-                      child: const Text("Don’t have an account? Sign Up"),
-                    ),
+                    // // ✅ زر تسجيل حساب جديد
+                    // TextButton(
+                    //   onPressed: () {
+                    //     Navigator.pushNamed(context, "/signup");
+                    //   },
+                    //   child: const Text("Don’t have an account? Sign Up"),
+                    // ),
                   ],
                 ),
               ),

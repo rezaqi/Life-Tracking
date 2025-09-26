@@ -29,7 +29,7 @@ class _AnimatedDotsState extends State<AnimatedDots> {
   void _startAnimation() {
     _timer = Timer.periodic(widget.duration, (timer) {
       setState(() {
-        if (_filledDots < 4) {
+        if (_filledDots < 6) {
           _filledDots++;
         }
       });

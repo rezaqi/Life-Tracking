@@ -20,7 +20,7 @@ void main() async {
       providers: [
         BlocProvider<OnboardingBloc>(create: (_) => getIt<OnboardingBloc>()),
         BlocProvider<LifeBloc>(create: (_) => getIt<LifeBloc>()),
-        BlocProvider(create: (_) => getIt<AuthBloc>()),
+        BlocProvider<AuthBloc>(create: (_) => getIt<AuthBloc>()),
       ],
       child: const MyApp(),
     ),

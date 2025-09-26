@@ -9,8 +9,12 @@ class UserModel {
   final List<String> goals;
   final String country;
   final String gender;
-  final String haveChildren; // جديد
+  final String haveChildren;
   final String pass;
+  final List<Map<String, dynamic>> children;
+  final String partnerName;
+  final String partnerBirthday;
+  final String anniversary;
 
   UserModel({
     required this.id,
@@ -23,7 +27,11 @@ class UserModel {
     this.goals = const [],
     this.country = '',
     this.gender = '',
-    this.haveChildren = '', // جديد
+    this.haveChildren = '',
     required this.pass,
+    this.children = const [],
+    this.partnerName = '',
+    this.partnerBirthday = '',
+    this.anniversary = '',
   });
 }

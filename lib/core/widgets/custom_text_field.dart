@@ -8,6 +8,9 @@ class CustomTextField extends StatelessWidget {
   void Function(String)? onChanged;
   final String? Function(String?)? validator;
   TextStyle? hintStyle;
+  final TextInputType? keyboardType;
+  final int? maxLength;
+  final Iterable<String>? autofillHints;
 
   CustomTextField({
     super.key,
@@ -18,6 +21,9 @@ class CustomTextField extends StatelessWidget {
     this.onChanged,
     this.validator,
     this.hintStyle,
+    this.keyboardType,
+    this.maxLength,
+    this.autofillHints,
   });
 
   @override
@@ -27,6 +33,9 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       obscureText: obscure,
       onChanged: onChanged,
+      keyboardType: keyboardType,
+      maxLength: maxLength,
+      autofillHints: autofillHints,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: hintStyle,

@@ -51,7 +51,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.prefs,
       preResolve: true,
     );
-    gh.factory<_i871.AuthService>(() => _i871.AuthService());
     gh.factory<_i461.TabBloc>(() => _i461.TabBloc());
     gh.lazySingleton<_i974.FirebaseFirestore>(() => registerModule.firestore);
     gh.lazySingleton<_i938.LocalDb>(() => registerModule.localDb);
@@ -70,8 +69,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i510.LifeExpectancyDataSource>(),
       ),
     );
-    gh.factory<_i260.AuthService>(() => _i260.MockAuthRepository());
-    gh.factory<_i363.AuthBloc>(() => _i363.AuthBloc(gh<_i871.AuthService>()));
+    gh.factory<_i260.AuthService>(() => _i871.FirebaseAuthService());
     gh.factory<_i449.GetLifeExpectancy>(
       () => _i449.GetLifeExpectancy(gh<_i721.LifeExpectancyRepository>()),
     );
@@ -87,6 +85,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i100.OnboardingBloc>(
       () => _i100.OnboardingBloc(gh<_i283.OnboardingRepository>()),
     );
+    gh.factory<_i363.AuthBloc>(() => _i363.AuthBloc(gh<_i260.AuthService>()));
     gh.factory<_i352.SaveUserUseCase>(
       () => _i352.SaveUserUseCase(gh<_i283.OnboardingRepository>()),
     );

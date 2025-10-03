@@ -16,3 +16,9 @@ class AppColor {
   static const Color title = Color(0xFF212121); // للنصوص الرئيسية
   static const Color subtitle = Color(0xFF757575); // للنصوص الثانوية
 }
+
+// Primary: Warm orange/coral (#FF6B35) - Adventure & energy
+// Secondary: Deep blue (#1B365D) - Trust & depth
+// Accent: Soft green (#4CAF50) - Growth & progress
+// Neutral: Warm grays (#F5F5F5, #333333)
+// Warning: Gentle amber (#FFC107) - Gentle reminders

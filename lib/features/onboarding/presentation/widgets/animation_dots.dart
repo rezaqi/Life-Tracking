@@ -51,7 +51,7 @@ class _AnimatedDotsState extends State<AnimatedDots> {
           padding: const EdgeInsets.symmetric(horizontal: 2),
           child: Text(
             index < _filledDots ? "●" : "○",
-            style: const TextStyle(fontSize: 30),
+            style: const TextStyle(fontSize: 20),
           ),
         );
       }),

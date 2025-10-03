@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:life_tracking/features/moments/presentation/widget/add_memory_modal.dart';
 import 'package:life_tracking/features/moments/presentation/widget/fancyAnimatedRing.dart';
 
 class MomentsPage extends StatefulWidget {
@@ -35,6 +36,13 @@ class _MomentsPageState extends State<MomentsPage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(context: context, builder: (context) => AddMemoryModal());
+        },
+        child: Icon(Icons.add),
+        tooltip: 'Add Memory',
       ),
     );
   }

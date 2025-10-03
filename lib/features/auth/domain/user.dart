@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+
 class UserModel {
   final String id;
   final String email;
@@ -34,4 +36,15 @@ class UserModel {
     this.partnerBirthday = '',
     this.anniversary = '',
   });
+
+  factory UserModel.fromFirebase(firebase_auth.User firebaseUser) {
+    return UserModel(
+      id: firebaseUser.uid,
+      email: firebaseUser.email ?? '',
+      name: '', // Will be filled from onboarding
+      age: 0,
+      birthday: '',
+      pass: '',
+    );
+  }
 }

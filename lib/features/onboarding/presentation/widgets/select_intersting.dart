@@ -16,13 +16,12 @@ class GoalsInput extends StatefulWidget {
 
 class _GoalsInputState extends State<GoalsInput> {
   final List<String> _options = [
-    "🏔️ Epic adventures",
-    "✈️ Traveling the world",
-    "📚 Learning new skills",
-    "🔨 Building something great",
-    "💼 Career Progression",
-    "👥 Deeper relationships",
-    "🎨 Creative expression",
+    "Family & relationships",
+    "Adventures & experiences",
+    "Learning & growth",
+    "Health & wellness",
+    "Career & achievement",
+    "Giving back & legacy",
   ];
 
   late Set<String> _selectedOptions;

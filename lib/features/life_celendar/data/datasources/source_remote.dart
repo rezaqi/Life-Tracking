@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
+import 'package:life_tracking/core/utils/firestore_retry.dart';
 import 'package:life_tracking/features/life_celendar/data/datasources/dm.dart';
 import 'package:life_tracking/features/life_celendar/data/models/day_model.dart';
 
@@ -58,21 +59,22 @@ class LifeCalenderDataSourceImpl extends DmLifeCalender {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(date));
 
-    await FirebaseFirestore.instance
-        .collection("users")
-        .doc(uid)
-        .collection("days")
-        .doc(docId)
-        .set({
-          "title": title,
-          "description": des,
-          "mood": mood,
-          "images": imageUrls,
-          "date": formattedDate,
-        });
+    await retryFirestoreOperation(() async {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(uid)
+          .collection("days")
+          .doc(docId)
+          .set({
+            "title": title,
+            "description": des,
+            "mood": mood,
+            "images": imageUrls,
+            "date": formattedDate,
+          });
+    });
   }
 
-  @override
   @override
   Future<DayModel?> getDayMemory(String userId, String date) async {
     try {
@@ -80,13 +82,15 @@ class LifeCalenderDataSourceImpl extends DmLifeCalender {
         'yyyy-MM-dd',
       ).format(DateTime.parse(date));
 
-      final snapshot = await FirebaseFirestore.instance
-          .collection("users")
-          .doc(userId)
-          .collection("days")
-          .where("date", isEqualTo: formattedDate) // 👈 مطابق
-          .limit(1)
-          .get();
+      final snapshot = await retryFirestoreOperation(() async {
+        return await FirebaseFirestore.instance
+            .collection("users")
+            .doc(userId)
+            .collection("days")
+            .where("date", isEqualTo: formattedDate) // 👈 مطابق
+            .limit(1)
+            .get();
+      });
 
       if (snapshot.docs.isNotEmpty) {
         return DayModel.fromMap(

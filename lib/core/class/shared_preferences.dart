@@ -1,4 +1,4 @@
-import 'package:life_tracking/features/auth/data/models/user.dart';
+import 'package:life_tracking/features/auth/domain/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPrefs {

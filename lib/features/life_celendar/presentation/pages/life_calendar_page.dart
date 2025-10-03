@@ -3,16 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:life_tracking/core/class/routs_name.dart';
 import 'package:life_tracking/core/class/shared_preferences.dart';
-import 'package:life_tracking/features/auth/data/models/user.dart';
-import 'package:life_tracking/features/auth/data/services/auth_service.dart';
+import 'package:life_tracking/features/auth/domain/user.dart';
 import 'package:life_tracking/features/life_celendar/data/models/dot_model.dart';
 import 'package:life_tracking/features/life_celendar/presentation/bloc/life_bloc.dart';
 import 'package:life_tracking/features/life_celendar/presentation/bloc/life_event.dart';
 import 'package:life_tracking/features/life_celendar/presentation/bloc/life_state.dart';
 import 'package:life_tracking/features/life_celendar/presentation/pages/dayDetailsPage.dart';
 import 'package:life_tracking/features/life_celendar/presentation/widgets/lifeWeeksWidget.dart';
+import 'package:life_tracking/features/life_celendar/presentation/widgets/life_in_weeks.dart';
 import 'package:life_tracking/features/life_celendar/presentation/widgets/life_progress_page.dart';
 
 class LifeCalendarPage extends StatefulWidget {
@@ -22,7 +21,10 @@ class LifeCalendarPage extends StatefulWidget {
   State<LifeCalendarPage> createState() => _LifeCalendarPageState();
 }
 
-class _LifeCalendarPageState extends State<LifeCalendarPage> {
+class _LifeCalendarPageState extends State<LifeCalendarPage>
+    with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
   final DateFormat dateFormat = DateFormat('dd MMM');
   DateTime currentMonth = DateTime(DateTime.now().year, DateTime.now().month);
   String viewMode = 'Monthly';
@@ -31,8 +33,23 @@ class _LifeCalendarPageState extends State<LifeCalendarPage> {
   @override
   void initState() {
     super.initState();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
+    _fadeController.forward();
     _loadUser();
     context.read<LifeBloc>().add(LoadLifeDots(DateTime.now().year));
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
   }
 
   Color _getCellColor(DateTime cellDate, DotModel? dot, DateTime today) {
@@ -100,107 +117,113 @@ class _LifeCalendarPageState extends State<LifeCalendarPage> {
       listener: (context, state) {},
       builder: (context, state) {
         var bloc = LifeBloc.get(context);
-        return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            title: const Text("Life Tracker"),
-            centerTitle: true,
-            backgroundColor: Colors.white,
-            actions: [
-              IconButton(
-                onPressed: () async {
-                  final AuthService authService = AuthService();
-                  await authService.logout();
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    AppRouts.login,
-                    (r) => false,
-                  );
-                },
-                icon: Icon(Icons.logout),
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.white, Colors.grey[50]!],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
-            ],
-          ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                Row(
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SingleChildScrollView(
+                child: Column(
                   children: [
-                    Text(
-                      "Good day, ",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          "Good day, ",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          userModel?.name ?? "there",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        Text(
+                          "! 👋",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      userModel?.name ?? "there",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
+                    SizedBox(height: h * 0.02),
+                    SizedBox(
+                      height: 120.h, // ممكن تغير على حسب اللي انت عايزه
+                      child: LifeProgressWidget(),
                     ),
-                    Text(
-                      "! 👋",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                    LifeWeeksWidget(currentAge: 25, lifeExpectancy: 96),
+
+                    // Padding(
+                    //   padding: const EdgeInsets.all(8.0),
+                    //   child: Row(
+                    //     mainAxisAlignment: MainAxisAlignment.center,
+                    //     children: [
+                    //       const Text(
+                    //         "View: ",
+                    //         style: TextStyle(fontWeight: FontWeight.bold),
+                    //       ),
+                    //       DropdownButton<String>(
+                    //         value: viewMode,
+                    //         items: viewOptions
+                    //             .map(
+                    //               (e) => DropdownMenuItem(
+                    //                 value: e,
+                    //                 child: Text(e),
+                    //               ),
+                    //             )
+                    //             .toList(),
+                    //         onChanged: (val) {
+                    //           setState(() {
+                    //             viewMode = val!;
+                    //           });
+                    //         },
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    SizedBox(
+                      height: h * 0.6, // أو أي نسبة مناسبة
+                      child: BlocBuilder<LifeBloc, LifeState>(
+                        builder: (context, state) {
+                          if (state.isLoading) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          if (userModel == null) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          var birthday = userModel!.birthday;
+                          if (birthday == null || birthday.trim().isEmpty) {
+                            birthday = "2000-01-01"; // تاريخ افتراضي
+                          }
+
+                          return LifeInWeeks(
+                            birthday: birthday,
+                            lifeExpectancy: userModel!.lifeExpectancy ?? 90,
+                          );
+                        },
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: h * 0.02),
-                SizedBox(
-                  height: 120.h, // ممكن تغير على حسب اللي انت عايزه
-                  child: LifeProgressWidget(),
-                ),
-                LifeWeeksWidget(currentAge: 25, lifeExpectancy: 96),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "View: ",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      DropdownButton<String>(
-                        value: viewMode,
-                        items: viewOptions
-                            .map(
-                              (e) => DropdownMenuItem(value: e, child: Text(e)),
-                            )
-                            .toList(),
-                        onChanged: (val) {
-                          setState(() {
-                            viewMode = val!;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: BlocBuilder<LifeBloc, LifeState>(
-                    builder: (context, state) {
-                      if (state.isLoading)
-                        return const Center(child: CircularProgressIndicator());
-
-                      final today = DateTime.now();
-
-                      if (viewMode == 'Weekly') {
-                        return _buildWeeklyCalendar(state, today, bloc);
-                      } else if (viewMode == 'Monthly') {
-                        return _buildMonthlyCalendar(state, w, today, bloc);
-                      } else {
-                        return _buildYearlyCalendar(state, today, bloc);
-                      }
-                    },
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         );

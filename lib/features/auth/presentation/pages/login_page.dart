@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:life_tracking/core/class/request_state.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:life_tracking/core/class/colors.dart';
 import 'package:life_tracking/core/class/routs_name.dart';
+import 'package:life_tracking/core/class/text.dart';
 import 'package:life_tracking/core/class/validator.dart';
-import 'package:life_tracking/features/auth/presentation/bloc/auth_event.dart';
-import 'package:life_tracking/features/auth/presentation/bloc/auth_state.dart';
-
-import '../../../../core/widgets/custom_button.dart';
-import '../../../../core/widgets/custom_text_field.dart';
-import '../bloc/auth_bloc.dart';
+import 'package:life_tracking/core/widgets/custom_text_field.dart';
+import 'package:life_tracking/features/auth/presentation/bloc/auth_bloc.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,83 +16,128 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: BlocConsumer<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (state.requestStateLogIn == RequestState.success &&
-                state.user != null) {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                AppRouts.lifeCalendarPage,
-                (rout) => false,
-              );
-            }
-          },
-          builder: (context, state) {
-            var bloc = AuthBloc.get(context);
-            return Padding(
-              padding: const EdgeInsets.all(20),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.pri, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AuthLoading) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) =>
+                      const Center(child: CircularProgressIndicator()),
+                );
+              } else {
+                Navigator.of(context, rootNavigator: true).pop();
+                if (state is AuthAuthenticated) {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRouts.tabsScreen,
+                    (r) => false,
+                  );
+                } else if (state is AuthError) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
+                }
+              }
+            },
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
               child: Form(
-                key: bloc.formKey,
+                key: _formKey,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const FlutterLogo(size: 70),
-                    const SizedBox(height: 20),
-
-                    // ✅ رسالة خطأ عند الفشل
-                    if (state.requestStateLogIn == RequestState.error &&
-                        state.failureLog != null)
-                      Text(
-                        state.failureLog!.message,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-
+                    SizedBox(height: 60.h),
+                    Icon(Icons.lock_outline, size: 80.sp, color: AppColors.pri),
+                    SizedBox(height: 20.h),
+                    Text(
+                      'Welcome Back',
+                      style: Styles.titleStyle.copyWith(fontSize: 28.sp),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Sign in to continue your journey',
+                      style: Styles.subtitleStyle,
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 40.h),
                     CustomTextField(
-                      validator: Validators.email,
-                      controller: bloc.emailC,
+                      controller: _emailController,
                       hint: "Email",
-                      icon: Icons.email,
+                      validator: Validators.email,
+                      keyboardType: TextInputType.emailAddress,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 16.h),
                     CustomTextField(
-                      validator: Validators.password,
-                      controller: bloc.passC,
+                      controller: _passwordController,
                       hint: "Password",
+                      validator: Validators.password,
                       obscure: true,
-                      icon: Icons.lock,
                     ),
-                    const SizedBox(height: 20),
-
-                    CustomButton(
-                      text: "Login",
-                      loading: state.requestStateLogIn == RequestState.loading,
-                      onPressed: () {
-                        context.read<AuthBloc>().add(
-                          LoginRequested(bloc.emailC.text, bloc.passC.text),
-                        );
-                      },
+                    SizedBox(height: 32.h),
+                    ElevatedButton(
+                      onPressed: _login,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.pri,
+                        foregroundColor: Colors.white,
+                        minimumSize: Size(double.infinity, 50.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      child: Text('Login', style: Styles.buttonText),
                     ),
-
-                    const SizedBox(height: 12),
-
-                    // // ✅ زر تسجيل حساب جديد
-                    // TextButton(
-                    //   onPressed: () {
-                    //     Navigator.pushNamed(context, "/signup");
-                    //   },
-                    //   child: const Text("Don’t have an account? Sign Up"),
-                    // ),
+                    SizedBox(height: 20.h),
+                    TextButton(
+                      onPressed: () =>
+                          Navigator.pushNamed(context, AppRouts.introScreen),
+                      child: Text(
+                        "Don't have an account? Sign Up",
+                        style: TextStyle(color: AppColors.pri, fontSize: 16.sp),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
+  }
+
+  void _login() {
+    if (_formKey.currentState!.validate()) {
+      context.read<AuthBloc>().add(
+        LoginRequested(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        ),
+      );
+    }
   }
 }

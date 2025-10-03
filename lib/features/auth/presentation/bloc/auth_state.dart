@@ -1,48 +1,21 @@
-import 'package:life_tracking/core/class/faiiur.dart';
-import 'package:life_tracking/core/class/request_state.dart';
-import 'package:life_tracking/features/auth/data/models/user.dart';
+part of 'auth_bloc.dart';
 
-class AuthState {
-  RequestState? requestStateLogIn;
-  RequestState? requestStateSignUp;
-  Failure? failureLog;
-  Failure? failureSignUp;
-  UserModel? user;
+abstract class AuthState {}
 
-  AuthState({
-    this.failureLog,
-    this.failureSignUp,
-    this.requestStateLogIn,
-    this.requestStateSignUp,
-    this.user,
-  });
+class AuthInitial extends AuthState {}
 
-  AuthState copyWith({
-    RequestState? requestStateLogIn,
-    RequestState? requestStateSignUp,
-    Failure? failureLog,
-    Failure? failureSignUp,
-    UserModel? user,
-  }) {
-    return AuthState(
-      failureLog: failureLog ?? this.failureLog,
-      failureSignUp: failureSignUp ?? this.failureSignUp,
-      requestStateLogIn: requestStateLogIn ?? this.requestStateLogIn,
-      requestStateSignUp: requestStateSignUp ?? this.requestStateSignUp,
-      user: user ?? this.user,
-    );
-  }
+class AuthLoading extends AuthState {}
+
+class AuthAuthenticated extends AuthState {
+  final UserModel? user;
+
+  AuthAuthenticated({this.user});
 }
 
-class AuthInitial extends AuthState {
-  AuthInitial()
-    : super(
-        requestStateLogIn: RequestState.init,
-        requestStateSignUp: RequestState.init,
-      );
-}
+class AuthUnauthenticated extends AuthState {}
 
 class AuthError extends AuthState {
   final String message;
-  AuthError(this.message);
+
+  AuthError({required this.message});
 }

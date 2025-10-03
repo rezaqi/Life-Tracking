@@ -1,0 +1,1 @@
+- [x] Add import 'package:firebase_app_check/firebase_app_check.dart'; to lib/main.dart

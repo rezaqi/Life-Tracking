@@ -3,14 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:life_tracking/core/class/colors.dart';
 import 'package:life_tracking/core/class/local_storage.dart';
-import 'package:life_tracking/core/class/request_state.dart';
 import 'package:life_tracking/core/class/routs_name.dart';
 import 'package:life_tracking/core/class/text.dart';
 import 'package:life_tracking/core/class/validator.dart';
 import 'package:life_tracking/core/widgets/custom_text_field.dart';
 import 'package:life_tracking/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:life_tracking/features/auth/presentation/bloc/auth_event.dart';
-import 'package:life_tracking/features/auth/presentation/bloc/auth_state.dart';
 import 'package:life_tracking/features/dashboard/const/countries.dart';
 import 'package:life_tracking/features/onboarding/presentation/func/onborading_view.dart';
 import 'package:life_tracking/features/onboarding/presentation/widgets/animation_dots.dart';
@@ -81,9 +78,7 @@ class _IntroScreenState extends State<IntroScreen> {
           _buildButton(
             isOutlined: true,
             text: " Sign In  ",
-            onPressed: () {
-              Navigator.pushNamed(context, AppRouts.login);
-            },
+            onPressed: () => Navigator.pushNamed(context, AppRouts.login),
           ),
         ],
       ),
@@ -230,8 +225,8 @@ class _IntroScreenState extends State<IntroScreen> {
     },
     // 13 intersting
     {
-      'title': "✨ What excites you most about life, $name?",
-      'subtitle': "Select all that call to you:",
+      'title': "What matters most to you in the time you have?",
+      'subtitle': null,
       'body': Padding(
         padding: const EdgeInsets.all(16.0),
         child: GoalsInput(
@@ -347,7 +342,7 @@ class _IntroScreenState extends State<IntroScreen> {
                 Expanded(
                   child: BlocListener<AuthBloc, AuthState>(
                     listener: (context, state) {
-                      if (state.requestStateSignUp == RequestState.loading) {
+                      if (state is AuthLoading) {
                         showDialog(
                           context: context,
                           barrierDismissible: false,
@@ -355,19 +350,18 @@ class _IntroScreenState extends State<IntroScreen> {
                               const Center(child: CircularProgressIndicator()),
                         );
                       } else {
-                        // لو مش لودنق نقفل أي Dialog مفتوح
                         Navigator.of(context, rootNavigator: true).pop();
 
-                        if (state.requestStateSignUp == RequestState.success) {
-                          _pageController.nextPage(
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeInOut,
-                          );
-                        } else if (state.requestStateSignUp ==
-                            RequestState.error) {
-                          _showSnackBar(
-                            state.failureSignUp?.message ?? "Signup failed",
-                          );
+                        if (state is AuthAuthenticated) {
+                          setOnboardingSeen().then((_) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              AppRouts.tabsScreen,
+                              (route) => false,
+                            );
+                          });
+                        } else if (state is AuthError) {
+                          _showSnackBar(state.message);
                         }
                       }
                     },
@@ -457,33 +451,41 @@ class _IntroScreenState extends State<IntroScreen> {
   }
 
   Widget _buildNavigationButtons(int index, int totalSlides) {
-    return Column(
-      children: [
-        if (index == 0)
-          ...[]
-        else if (index == 2) ...[
-          _buildButton(text: "Let's Go! 🚀", onPressed: () => _goToNext(index)),
-        ] else if (index == totalSlides - 1) ...[
-          _buildButton(text: "Enter Dashboard 🚀", onPressed: _onFinish),
-        ] else
-          _buildButton(text: "Next", onPressed: () => _goToNext(index)),
-        if (index != 0)
-          Column(
-            children: [
-              SizedBox(height: 20.h),
-              _buildButton(
-                isOutlined: true,
-                text: "Back",
-                onPressed: () => _pageController.animateToPage(
-                  index - 1,
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOut,
-                ),
-              ),
-            ],
+    List<Widget> buttons = [];
+    if (index == 0) {
+      // nothing
+    } else if (index == 2) {
+      buttons.add(
+        _buildButton(text: "Let's Go! 🚀", onPressed: () => _goToNext(index)),
+      );
+    } else if (index == totalSlides - 1) {
+      buttons.add(
+        _buildButton(text: "Enter Dashboard 🚀", onPressed: _onFinish),
+      );
+    } else if (index == 11) {
+      buttons.add(
+        _buildButton(text: "✓ Continue", onPressed: () => _goToNext(index)),
+      );
+    } else {
+      buttons.add(
+        _buildButton(text: "Next", onPressed: () => _goToNext(index)),
+      );
+    }
+    if (index != 0) {
+      buttons.add(SizedBox(height: 20.h));
+      buttons.add(
+        _buildButton(
+          isOutlined: true,
+          text: "Back",
+          onPressed: () => _pageController.animateToPage(
+            index - 1,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
           ),
-      ],
-    );
+        ),
+      );
+    }
+    return Column(children: buttons);
   }
 
   void _goToNext(int index) async {
@@ -592,7 +594,11 @@ class _IntroScreenState extends State<IntroScreen> {
     // );
 
     setOnboardingSeen();
-    Navigator.pushReplacementNamed(context, AppRouts.tabsScreen);
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRouts.tabsScreen,
+      (route) => false,
+    );
   }
 
   void _showSnackBar(String message) {
@@ -631,7 +637,7 @@ class _IntroScreenState extends State<IntroScreen> {
           spacing: icon != null ? 20.w : 0,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon),
+            if (icon != null) Icon(icon),
             Text(text, style: Styles.buttonText),
           ],
         ),

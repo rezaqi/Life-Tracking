@@ -1,5 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:life_tracking/features/app_settings/data/app_settings_service.dart';
+import 'package:life_tracking/features/app_settings/presentation/pages/payment_page.dart';
 import 'package:life_tracking/features/auth/presentation/pages/login_page.dart';
 import 'package:life_tracking/features/onboarding/presentation/page/intro_screen.dart';
 import 'package:life_tracking/features/tabs/presentaion/page/tabs.dart';
@@ -24,14 +25,26 @@ class _RootScreenState extends State<RootScreen> {
   Future<void> _decideStartPage() async {
     final prefs = await SharedPreferences.getInstance();
     final onboardingSeen = prefs.getBool('onboarding_seen') ?? false;
-    final user = FirebaseAuth.instance.currentUser;
-
+    print(onboardingSeen);
+    Widget tempPage;
     if (!onboardingSeen) {
-      _startPage = IntroScreen();
-    } else if (user == null) {
-      _startPage = const LoginPage();
+      tempPage = IntroScreen();
     } else {
-      _startPage = TabsScreen();
+      final userId = prefs.getString('id');
+      if (userId != null && userId.isNotEmpty) {
+        tempPage = TabsScreen();
+      } else {
+        tempPage = const LoginPage();
+      }
+    }
+
+    // Check isOn
+    final service = AppSettingsService();
+    final isOn = await service.getIsOn();
+    if (isOn) {
+      _startPage = const PaymentPage();
+    } else {
+      _startPage = tempPage;
     }
 
     setState(() {});

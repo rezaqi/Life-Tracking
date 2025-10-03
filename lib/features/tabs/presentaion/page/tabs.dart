@@ -15,6 +15,10 @@ class TabsScreen extends StatelessWidget {
           final bloc = TabBloc.get(context);
 
           return Scaffold(
+            appBar: AppBar(
+              title: Text(bloc.title),
+              actions: bloc.getActions(context),
+            ),
             body: SafeArea(child: bloc.tabs[state.indexScreen]),
 
             bottomNavigationBar: Padding(
@@ -45,7 +49,7 @@ class TabsScreen extends StatelessWidget {
                         icon: CustomTabWidget(
                           bloc: bloc,
                           index: 1,
-                          icon: Icons.emoji_events_outlined,
+                          icon: Icons.calendar_month_outlined,
                         ),
                         label: "",
                       ),
@@ -54,7 +58,7 @@ class TabsScreen extends StatelessWidget {
                         icon: CustomTabWidget(
                           bloc: bloc,
                           index: 2,
-                          icon: Icons.person,
+                          icon: Icons.note_alt,
                         ),
                         label: "",
                       ),
@@ -62,7 +66,15 @@ class TabsScreen extends StatelessWidget {
                         icon: CustomTabWidget(
                           bloc: bloc,
                           index: 3,
-                          icon: Icons.settings,
+                          icon: Icons.explore,
+                        ),
+                        label: "",
+                      ),
+                      BottomNavigationBarItem(
+                        icon: CustomTabWidget(
+                          bloc: bloc,
+                          index: 4,
+                          icon: Icons.person,
                         ),
                         label: "",
                       ),
